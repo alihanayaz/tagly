@@ -20,6 +20,8 @@ from decouple import config
 
 urlpatterns = [
     path('', include("bookmarks.urls")),
+    path("account/", include("accounts.urls")),
+    path("account/", include("django.contrib.auth.urls")),
 ]
 
 if config('DEBUG', default=False, cast=bool):
