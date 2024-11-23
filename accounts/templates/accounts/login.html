@@ -1,0 +1,20 @@
+{% extends 'accounts/accounts-layout.html' %}
+{% block heading %}Log In{% endblock %}
+{% block main %}
+<form method="POST" action="{% url 'accounts:login' %}">
+    {% csrf_token %}
+    <div>
+        <label for="username">Username or Email</label>
+        <input type="text" name="username" id="username" required>
+    </div>
+    <div>
+        <label for="password">Password</label>
+        <input type="password" name="password" id="password" required>
+    </div>
+    {% if form.non_field_errors %}
+        <div class="error">{{ form.non_field_errors }}</div>
+    {% endif %}
+    <button type="submit" class="btn btn-primary transition">Log In</button>
+</form>
+<p>Don't have an account? <a href="{% url 'accounts:signup' %}" class="link">Sign up here.</a></p>
+{% endblock %}

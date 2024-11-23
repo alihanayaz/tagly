@@ -1,0 +1,12 @@
+{% extends 'layout.html' %}
+{% load static %}
+{% block title %}Account{% endblock %}
+{% block styles %}
+<link href="{% static 'styles/accounts/layout.css' %}" rel="stylesheet" type="text/css"/>
+{% endblock %}
+{% block body %}
+<div class="container">
+    <h1 class="heading">{% block heading %}{% endblock %}</h1>
+    <main>{% block main %}{% endblock %}</main>
+</div>
+{% endblock %}
