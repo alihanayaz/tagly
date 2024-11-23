@@ -5,6 +5,7 @@
   --light-gray: #fafafa;
   --lighter-gray: #f5f5f5;
   --light-gray-blue: #e5e7eb;
+  --dark-gray: #737373;
   --orange: #f35815;
   --dark-orange: #b83a05;
   --overlay: rgba(0, 0, 0, 0.2);
@@ -21,6 +22,12 @@
   --font-lg: 1.125rem;
   --font-xl: 1.25rem;
   --font-xxl: 1.5rem;
+
+  /* RADIUS */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 1rem;
+  --radius-xl: 2rem;
 }
 
 /* RESET */
@@ -164,4 +171,56 @@ body {
   font-size: var(--font-md);
   line-height: 1.5rem;
   letter-spacing: 0.05rem;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.heading {
+  font-weight: 600;
+  letter-spacing: -0.05em;
+  line-height: 2rem;
+  font-size: var(--font-xxl);
+  margin-bottom: var(--spacing-lg);
+}
+
+.link {
+  color: var(--orange);
+}
+
+.link:hover {
+  color: var(--dark-orange);
+  text-decoration-line: underline;
+  text-underline-offset: 4px;
+}
+
+.btn {
+  display: inline-block;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-lg);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background-color: var(--orange);
+  color: var(--white);
+}
+
+.btn-primary:hover {
+  background-color: var(--dark-orange);
+}
+
+.transition {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+hr {
+  margin: var(--spacing-lg) 0;
+  border: 0;
+  border-top: 1px solid var(--light-gray-blue);
+  width: 100%;
 }
