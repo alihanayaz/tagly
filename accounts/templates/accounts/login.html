@@ -1,7 +1,7 @@
 {% extends 'accounts/accounts-layout.html' %}
 {% block heading %}Log In{% endblock %}
 {% block main %}
-<form method="POST" action="{% url 'accounts:login' %}">
+<form method="POST" action="{% url 'accounts:login' %}" class="form">
     {% csrf_token %}
     <div>
         <label for="username">Username or Email</label>

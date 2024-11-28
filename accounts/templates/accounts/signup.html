@@ -2,7 +2,7 @@
 {% block title %}Account{% endblock %}
 {% block heading %}Sign Up{% endblock %}
 {% block main %}
-<form method="POST" action="{% url 'accounts:signup' %}">
+<form method="POST" action="{% url 'accounts:signup' %}" class="form">
   {% csrf_token %}
   {% for field in form %}
       <div>
