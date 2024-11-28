@@ -1,0 +1,102 @@
+{% extends 'layout.html' %}
+{% load static %}
+{% block title %}Bookmarks{% endblock %}
+{% block styles %}
+<link href="{% static 'styles/bookmarks/layout.css' %}" rel="stylesheet" type="text/css"/>
+{% endblock %}
+{% block scripts %}
+<script src="{% static 'scripts/bookmarks/layout.js' %}"></script>
+{% if user.is_authenticated %}
+<script src="{% static 'scripts/bookmarks/api.js' %}"></script>
+{% endif %}
+{% endblock %}
+{% block body %}
+<div class="container">
+    <div class="overlay"></div>
+    <aside>
+    <h1 class="heading">Tagly</h1>
+    <nav>
+        <ul>
+            {% if user.is_authenticated %}
+            <li>
+                <span class="tab transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <span>{{ user }}</span>
+                </span>
+            </li>
+            <li>
+                <a href="{% url 'accounts:logout' %}" class="tab transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+                    <span>Log Out</span>
+                </a>
+            </li>
+            {% else %}
+            <li>
+                <a href="{% url 'accounts:signup' %}" class="tab transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>
+                    <span>Sign Up</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'accounts:login' %}" class="tab transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" x2="3" y1="12" y2="12"/></svg>
+                    <span>Log In</span>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+        <hr />
+        {% if user.is_authenticated %}
+            <ul>
+                <li>
+                    <span id="get-bookmarks" class="tab transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+                        <span>All Bookmarks</span>
+                    </span>
+                </li>
+                <li>
+                    <span id="get-favorites" class="tab transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/></svg>
+                        <span>Favorites</span>
+                    </span>
+                </li>
+            </ul>
+            <hr />
+            <h3 class="subheading">Collections</h3>
+            <div>
+                <form id="create-collection-form" class="form">
+                    {% csrf_token %}
+                    <input type="text" name="name" id="create-collection-name" placeholder="New collection">
+                    <input type="submit" hidden />
+                </form>
+            </div>
+            {% if collections %}
+            <div id="collections-list">
+                {% for collection in collections %}
+                    <div>
+                        <span data-collection-id="{{ collection.id }}" class="tab transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>
+                            <span>{{ collection.name }}</span>
+                        </span>
+                    </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        {% endif %}
+    </nav>
+    </aside>
+    <main>
+    <header>
+        <div class="sidebar-toggle-container">
+            <button id="sidebar-toggle-button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" "><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+            </button>
+        </div>
+        <h2 style="font-weight: 600">Bookmark Manager</h2>
+        <div class="space"></div>
+    </header>
+    <hr />
+    {% block main %}{% endblock %}
+    </main>
+</div>
+{% endblock %}

@@ -1,0 +1,247 @@
+.container {
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: auto;
+  padding: var(--spacing-lg);
+}
+
+aside {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  overflow: auto;
+  width: 75%;
+  height: 100%;
+  z-index: 30;
+  background-color: var(--light-gray);
+  border-right: 1px solid var(--light-gray-blue);
+  animation: slideIn 0.5s forwards;
+  padding: var(--spacing-md);
+}
+
+aside.open {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-toggle-container {
+  display: block;
+  margin-right: var(--spacing-md);
+}
+
+.overlay {
+  display: none;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  inset: 0;
+  background-color: var(--overlay);
+  z-index: 20;
+  pointer-events: none;
+}
+
+.overlay.active {
+  display: block;
+  pointer-events: auto;
+}
+
+body.no-scroll {
+  overflow: hidden;
+}
+
+aside h1 {
+  font-size: var(--font-xl);
+  font-weight: 700;
+  margin-bottom: var(--spacing-xl);
+  text-align: center;
+}
+
+.tab {
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  border-radius: var(--spacing-sm);
+  cursor: pointer;
+  line-height: var(--font-md);
+}
+
+.tab:hover {
+  background-color: var(--light-gray-blue);
+}
+
+header {
+  min-height: 1.2rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding: 0.2rem 0.4rem;
+  white-space: nowrap;
+}
+
+#sidebar-toggle-button {
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+header > .heading {
+  margin: 0;
+}
+
+.space {
+  flex: 1;
+  flex-shrink: 1;
+}
+
+#dynamic-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  border: 1px solid var(--light-gray-blue);
+  border-radius: var(--radius-sm);
+  background-color: var(--white);
+  font-size: var(--font-sm);
+  line-height: var(--font-xl);
+}
+
+.item:hover {
+  background-color: var(--lighter-gray);
+}
+
+.item .item-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: var(--font-md);
+}
+
+.item .item-link {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.item .item-collection {
+  color: var(--dark-gray);
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-md);
+}
+
+.edit-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: none;
+  background-color: var(--blue);
+  color: var(--white);
+  border: none;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  z-index: 990;
+}
+
+.item:hover .edit-button {
+  display: block;
+  z-index: 990;
+}
+
+#edit-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--overlay);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+#edit-modal.hidden {
+  display: none;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 400px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.close-button {
+  float: right;
+  cursor: pointer;
+  font-size: 20px;
+  margin-left: var(--spacing-sm);
+}
+
+.item-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+}
+
+/* MEDIA QUERIES */
+@media screen and (min-width: 1024px) {
+  .container {
+    flex-direction: row;
+  }
+
+  aside {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    height: 100dvh;
+    width: 256px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar-toggle-container {
+    display: none;
+  }
+}
+/*  */
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}

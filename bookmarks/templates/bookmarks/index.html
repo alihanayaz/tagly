@@ -1,0 +1,29 @@
+{% extends "bookmarks/bookmarks-layout.html" %}
+{% block main %}
+{% if user.is_authenticated %}
+<div id="create-bookmark-form" class="hidden">
+    <form id="create-bookmark" class="form">
+        {% csrf_token %}
+        <input type="text" name="url" id="create-bookmark-url" placeholder="URL">
+        <input type="text" name="title" id="create-bookmark-title" placeholder="Title">
+        <input type="submit" value="Add new bookmark" class="btn btn-primary transition">
+    </form>
+</div>
+<div id="edit-modal" class="hidden">
+    <div class="modal-content">
+        <span id="close-modal" class="close-button">&times;</span>
+        <form id="edit-bookmark-form" class="form">
+          <input type="hidden" name="id" id="bookmark-id">
+          <input type="text" name="title" id="bookmark-title" placeholder="Title" minlength="1" required>
+          <input type="text" name="url" id="bookmark-url" placeholder="URL" minlength="1" required>
+          <select name="collection" id="bookmark-collection">
+            <option value="">Select Collection</option>
+          </select>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </form>
+      </div>
+</div>
+{% endif %}
+<div id="dynamic-content"></div>
+{% endblock %}
+
