@@ -1,1 +1,211 @@
-# tagly
+<div align="center">
+  <br>
+  <h1><b>Tagly</b></h1>
+  <strong>Simple and intuitive bookmark manager</strong>
+</div>
+<br>
+<table align="center" style="border-collapse:separate;">
+  <tr>
+    <td><small>Python</small></td>
+    <td><small>Django</small></td>
+    <td><small>JavaScript</small></td>
+    <td><small>PostgreSQL</small></td>
+    <td><small>HTML</small></td>
+    <td><small>CSS</small></td>
+  </tr>
+</table>
+<hr>
+
+# Table of Contents
+
+- [Introduction](#introduction)
+  - [Installation](#installation)
+  - [How Tagly works](#how-tagly-works)
+- [Code and organization](#code-and-organization)
+  - [The project folder: tagly](#the-project-folder-tagly)
+  - [The App folders: accounts and bookmarks](#the-app-folders-accounts-and-bookmarks)
+  - [The static folder](#the-static-folder)
+  - [Templates](#templates)
+  - [Third-party code](#third-party-code)
+- [About and license](#about-and-license)
+- [Distinctiveness and complexity](#distinctiveness-and-complexity)
+
+# Introduction
+
+Tagly is a bookmark management tool designed to help users organize, categorize, and access their bookmarks efficiently. With features like collections, favorites, and pagination, Tagly ensures a seamless experience for managing online resources.
+
+## Installation
+
+<details>
+   <summary>1. Clone this repository</summary>
+
+> ```bash
+> git clone https://github.com/alihanayaz/tagly.git
+> ```
+>
+> Set up a virtual environment:
+>
+> ```bash
+> python -m venv venv
+> source venv/bin/activate  # For Linux/macOS
+> venv\Scripts\activate  # For Windows
+> ```
+
+</details>
+
+<details>
+   <summary>2. Install dependencies</summary>
+
+> ```bash
+> pip install -r requirements.txt
+> ```
+
+</details>
+
+<details>
+   <summary>3. Set up PostgreSQL database</summary>
+
+> Update the `settings.py` file with your database credentials or use `.env` for secure configuration:
+>
+> ```python
+> DATABASES = {
+>    'default': {
+>        'ENGINE': 'django.db.backends.postgresql',
+>        'NAME': 'tagly',
+>        'USER': 'your_user',
+>        'PASSWORD': 'your_password',
+>        'HOST': 'localhost',
+>        'PORT': '5432',
+>    }
+> }
+> ```
+>
+> Alternatively, use the provided `.env.example` file to set up environment variables. Here is an example of a complete `.env` file configuration:
+>
+> ```env
+> SECRET_KEY='django-insecure-123456'
+> DEBUG=False
+> ALLOWED_HOSTS='127.0.0.1,0.0.0.0,users-macbook-pro.local,.vercel.app'
+> DB_NAME=tagly
+> DB_PASSWORD=postgres
+> DB_USER=postgres
+> DB_PORT=5432
+> DB_HOST=localhost
+> ```
+
+</details>
+
+<details>
+   <summary>4. Run migrations and create superuser</summary>
+
+> ```bash
+> python manage.py makemigrations
+> python manage.py migrate
+> python manage.py createsuperuser
+> ```
+
+</details>
+
+<details>
+   <summary>5. Start the development server</summary>
+
+> ```bash
+> python manage.py runserver
+> ```
+>
+> Access the application at `http://127.0.0.1:8000`
+
+</details>
+
+## How Tagly works
+
+1. **User Authentication**:
+
+   - Sign up or log in using username or email.
+   - Manage sessions securely with Django's authentication system.
+
+2. **Bookmark Management**:
+
+   - Create, edit, and delete bookmarks.
+   - Organize bookmarks into collections.
+   - Mark bookmarks as favorites for quick access.
+
+3. **Responsive Design**:
+
+   - Mobile-friendly interface for seamless access on all devices.
+
+4. **Pagination**:
+
+   - Navigate through bookmarks and collections with ease, thanks to the pagination feature.
+
+# Code and organization
+
+## The project folder: tagly
+
+The root directory contains Django project configurations, including `settings.py`, `urls.py`, and `wsgi.py`. These files are standard for a Django project, with `settings.py` tailored for PostgreSQL and environment variable management using `decouple`. The `.env.example` file provides an example configuration for required environment variables.
+
+## The App folders: accounts and bookmarks
+
+### **1. accounts**
+
+Handles user authentication and custom user models:
+
+- Custom user model `TaglyUser` with fields for username, email, and more.
+- Supports login using either username or email via a custom authentication backend.
+- Views for login, signup, and logout functionalities.
+
+### **2. bookmarks**
+
+Core functionality for bookmark management:
+
+- Models for `Bookmark` and `Collection`.
+- Views for CRUD operations on bookmarks and collections.
+- Pagination and filtering features to enhance user experience.
+- Integration with AJAX for dynamic updates.
+
+## The static folder
+
+Static assets include:
+
+- CSS: Responsive styles in `static/styles`.
+- JavaScript: Event listeners, AJAX calls, and dynamic content management in `static/scripts`.
+
+Additionally, there are static folders in each app (`accounts/static` and `bookmarks/static`) and a shared `static` folder in the root for common assets.
+
+## Templates
+
+Templates are organized under each app folder. Shared layouts like `layout.html` ensure consistent design, while app-specific templates handle unique functionalities. The root `templates` folder also includes shared templates for common use across the project.
+
+## Third-party code
+
+This project leverages the following third-party libraries and tools:
+
+- [Django](https://www.djangoproject.com/): Backend framework.
+- [PostgreSQL](https://www.postgresql.org/): Database management.
+- [python-decouple](https://pypi.org/project/python-decouple/): For managing environment variables.
+- [psycopg](https://pypi.org/project/psycopg/): PostgreSQL adapter for Python.
+- [asgiref](https://pypi.org/project/asgiref/): For ASGI server functionality.
+- [sqlparse](https://pypi.org/project/sqlparse/): Used for SQL formatting.
+- [typing-extensions](https://pypi.org/project/typing-extensions/): Backport of type hinting features.
+- [whitenoise](https://pypi.org/project/whitenoise/): For serving static files in production.
+
+# About and license
+
+Tagly was developed as the capstone project for CS50 Web Programming with Python and JavaScript. It adheres to the course’s guidelines for distinctiveness and complexity.
+
+This project is open-source under the MIT License. Feel free to use, modify, and share it.
+
+# Distinctiveness and complexity
+
+Tagly stands out from other projects due to its unique combination of features and implementation:
+
+- **Distinctiveness**: Unlike any CS50W project, Tagly focuses on bookmark management with advanced functionalities like collections and favorites, offering a focused and unique user experience.
+- **Complexity**:
+  - Custom user model and authentication backend.
+  - Advanced bookmark features with AJAX for real-time updates.
+  - Responsive design for seamless use across devices.
+  - Utilization of PostgreSQL for efficient and scalable database management.
+  - Robust database schema with relationships between users, bookmarks, and collections.
+  - Centralized and app-specific static and template folders for modular design.
+  - Configuration for production-ready static file management using `whitenoise`.
+
