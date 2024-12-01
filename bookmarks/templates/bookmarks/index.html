@@ -9,9 +9,9 @@
         <input type="submit" value="Add new bookmark" class="btn btn-primary transition">
     </form>
 </div>
-<div id="edit-modal" class="hidden">
+<div id="edit-bookmark-modal" class="edit-modal hidden">
     <div class="modal-content">
-        <span id="close-modal" class="close-button">&times;</span>
+        <span id="close-bookmark-modal" class="close-button">&times;</span>
         <form id="edit-bookmark-form" class="form">
           <input type="hidden" name="id" id="bookmark-id">
           <input type="text" name="title" id="bookmark-title" placeholder="Title" minlength="1" required>
@@ -22,6 +22,20 @@
           <button type="submit" class="btn btn-primary">Save Changes</button>
         </form>
       </div>
+</div>
+<div id="collection-actions" class="form hidden">
+  <button id="delete-collection-btn" class="btn btn-danger">Delete Collection</button>
+  <button id="edit-collection-btn" class="btn btn-primary">Edit Collection</button>
+</div>
+<div id="edit-collection-modal" class="edit-modal hidden">
+  <div class="modal-content">
+    <span id="close-collection-modal" class="close-button">&times;</span>
+    <form id="edit-collection-form" class="form">
+      <label for="edit-collection-name">Collection Name:</label>
+      <input type="text" id="edit-collection-name" name="name" required />
+      <button type="submit" class="btn btn-primary">Save Changes</button>
+    </form>
+  </div>
 </div>
 {% endif %}
 <div id="dynamic-content"></div>

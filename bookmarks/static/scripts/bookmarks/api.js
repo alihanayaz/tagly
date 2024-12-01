@@ -1,317 +1,363 @@
-document.addEventListener("DOMContentLoaded", function () {
-  const contentDiv = document.getElementById("dynamic-content");
-  const bookmarksButton = document.getElementById("get-bookmarks");
-  const collectionButtons = document.querySelectorAll("[data-collection-id]");
-  const bookmarkForm = document.getElementById("create-bookmark-form");
-  const editModal = document.getElementById("edit-modal");
-  const editBookmarkForm = document.getElementById("edit-bookmark-form");
-  const favoritesButton = document.getElementById("get-favorites");
-  const collectionForm = document.getElementById("create-collection-form");
-  let currentView;
-  let currentPage = 1;
+const API = {
+  async request(url, method = "GET", body = null) {
+    const headers = {
+      "Content-Type": "application/json",
+      "X-CSRFToken": document.querySelector("[name='csrfmiddlewaretoken']")
+        .value,
+    };
+    const options = { method, headers };
+    if (body) options.body = JSON.stringify(body);
 
-  async function makeRequest(url, method, body) {
     try {
-      const options = {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          "X-CSRFToken": document.querySelector(
-            "#create-bookmark input[name='csrfmiddlewaretoken']"
-          ).value,
-        },
-      };
-
-      if (method === "POST") {
-        options.body = JSON.stringify(body);
-      }
-
       const response = await fetch(url, options);
-      const data = await response.json();
-      return data;
+      if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
+      return response.json();
     } catch (error) {
-      console.error("Error making request:", error);
+      console.error(error);
+      return null;
     }
-  }
+  },
+};
 
-  const closeModal = () => {
-    editModal.classList.add("hidden");
-  };
-  document.getElementById("close-modal").addEventListener("click", closeModal);
+const BookmarkApp = {
+  currentPage: 1,
+  currentView: { type: "all", id: null },
 
-  function createBookmarkCard(bookmark) {
-    const bookmarkElement = document.createElement("div");
-    bookmarkElement.className = "item";
-    bookmarkElement.dataset.bookmarkId = bookmark.id;
-    bookmarkElement.innerHTML = `
-    <span class="item-title">${bookmark.title}</span>
-    <div class="item-link">
-    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17H7A5 5 0 0 1 7 7h2"></path><path d="M15 7h2a5 5 0 1 1 0 10h-2"></path><line x1="8" x2="16" y1="12" y2="12"></line></svg>
-    <a href="${bookmark.url}" target="_blank" rel="noopener noreferrer"
-    >${bookmark.url}</a>
-    </div>
-    ${
-      bookmark.collection__name
-        ? `<p class="item-collection">${bookmark.collection__name}</p>`
-        : ""
+  async loadBookmarks({
+    collectionId = null,
+    isFavorite = null,
+    page = 1,
+  } = {}) {
+    this.currentPage = page;
+    this.currentView = collectionId
+      ? { type: "collection", id: collectionId }
+      : isFavorite
+      ? { type: "favorites", id: null }
+      : { type: "all", id: null };
+
+    const queryParams = new URLSearchParams({ page });
+    if (collectionId) queryParams.append("collection_id", collectionId);
+    if (isFavorite) queryParams.append("is_favorite", true);
+
+    const data = await API.request(`/bookmarks/?${queryParams.toString()}`);
+    this.renderBookmarks(data);
+    this.toggleCreateBookmarkForm();
+    this.toggleCollectionActions();
+  },
+
+  async loadCollections() {
+    const data = await API.request("/collections/");
+    if (data) this.renderCollections(data.collections);
+  },
+
+  renderBookmarks(data) {
+    const contentDiv = document.getElementById("dynamic-content");
+    contentDiv.innerHTML = "";
+
+    if (!data || !data.bookmarks.length) {
+      const noBookmarksMessage = document.createElement("p");
+      noBookmarksMessage.textContent = "No bookmarks found.";
+      contentDiv.appendChild(noBookmarksMessage);
+      return;
     }
-    <button class="edit-button hidden">Edit</button>
-    <div class="item-actions">
-      <button id="favorite-label" class="btn btn-primary">
-      ${bookmark.is_favorite ? "Unfavorite" : "Favorite"}
-      </button>
-      <button id="delete-label" class="btn btn-danger">Delete</button>
-    </div>
-    `;
 
-    const editButton = bookmarkElement.querySelector(".edit-button");
-    editButton.addEventListener("click", () => openEditModal(bookmark));
+    data.bookmarks.forEach((bookmark) => {
+      const bookmarkElement = this.createBookmarkCard(bookmark);
+      contentDiv.appendChild(bookmarkElement);
+    });
 
-    const favoriteButton = bookmarkElement.querySelector("#favorite-label");
-    favoriteButton.addEventListener("click", () => toggleFavorite(bookmark.id));
+    this.renderPaginationControls(data);
+  },
 
-    const deleteButton = bookmarkElement.querySelector("#delete-label");
-    deleteButton.addEventListener("click", () => deleteBookmark(bookmark.id));
-
-    bookmarkElement.addEventListener("mouseover", () =>
-      editButton.classList.remove("hidden")
-    );
-    bookmarkElement.addEventListener("mouseout", () =>
-      editButton.classList.add("hidden")
-    );
-
-    contentDiv.appendChild(bookmarkElement);
-  }
-
-  async function getAllCollections() {
-    const response = await makeRequest("/collections/", "GET");
+  renderCollections(collections) {
     const collectionsList = document.getElementById("collections-list");
     collectionsList.innerHTML = "";
-    response.collections.forEach((collection) => {
+    collections.forEach((collection) => {
       const collectionElement = document.createElement("div");
       collectionElement.innerHTML = `
-      <span data-collection-id="${collection.id}" class="tab transition">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>
-      <span>${collection.name}</span>
-      </span>
+        <span data-collection-id="${collection.id}" class="tab transition">
+          <span>${collection.name}</span>
+        </span>
       `;
       collectionsList.appendChild(collectionElement);
-    });
-  }
 
-  async function handleSelectCollections(selectElement) {
-    const response = await makeRequest("/collections/", "GET");
-    selectElement.innerHTML = `<option value="">Select Collection</option>`;
+      collectionElement
+        .querySelector("[data-collection-id]")
+        .addEventListener("click", () =>
+          this.loadBookmarks({ collectionId: collection.id })
+        );
+    });
+  },
+
+  createBookmarkCard(bookmark) {
+    const card = document.createElement("div");
+    card.className = "item";
+    card.innerHTML = `
+      <h3 class="item-title">${bookmark.title}</h3>
+      <div class="item-link">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17H7A5 5 0 0 1 7 7h2"></path><path d="M15 7h2a5 5 0 1 1 0 10h-2"></path><line x1="8" x2="16" y1="12" y2="12"></line></svg>
+      <a href="${bookmark.url}" target="_blank" rel="noopener noreferrer"
+      >${bookmark.url}</a>
+      </div>
+      <p class="item-collection">${
+        bookmark.collection__name || "Uncategorized"
+      }</p>
+      <button class="btn-edit hidden">Edit</button>
+      <div class="item-actions">
+        <button id="btn-favorite" class="btn btn-primary">
+        ${bookmark.is_favorite ? "Unfavorite" : "Favorite"}
+        </button>
+        <button id="btn-delete" class="btn btn-danger">Delete</button>
+      </div>
+    `;
+
+    card
+      .querySelector("#btn-favorite")
+      .addEventListener("click", () => this.toggleFavorite(bookmark.id));
+    card
+      .querySelector(".btn-edit")
+      .addEventListener("click", () => this.openEditModal(bookmark));
+    card
+      .querySelector("#btn-delete")
+      .addEventListener("click", () => this.deleteBookmark(bookmark.id));
+
+    return card;
+  },
+
+  openEditModal(bookmark) {
+    const modal = document.getElementById("edit-bookmark-modal");
+    document.getElementById("bookmark-id").value = bookmark.id;
+    document.getElementById("bookmark-title").value = bookmark.title;
+    document.getElementById("bookmark-url").value = bookmark.url;
+    this.populateCollectionSelect(
+      bookmark.collection__id,
+      bookmark.collection__name
+    );
+    modal.classList.remove("hidden");
+  },
+
+  async populateCollectionSelect(collectionId = null, collectionName = null) {
+    const response = await API.request("/collections/");
+    const select = document.getElementById("bookmark-collection");
+    select.innerHTML = "";
+
+    const defaultOption = document.createElement("option");
+    defaultOption.value = "";
+    defaultOption.textContent = "Select Collection";
+    select.appendChild(defaultOption);
+
     response.collections.forEach((collection) => {
       const option = document.createElement("option");
       option.value = collection.id;
       option.textContent = collection.name;
-      selectElement.appendChild(option);
-    });
-  }
 
-  function openEditModal(bookmark) {
-    const bookmarkIdInput = document.getElementById("bookmark-id");
-    const bookmarkTitleInput = document.getElementById("bookmark-title");
-    const bookmarkUrlInput = document.getElementById("bookmark-url");
-    const collectionSelect = document.getElementById("bookmark-collection");
-
-    bookmarkIdInput.value = bookmark.id;
-    bookmarkTitleInput.value = bookmark.title;
-    bookmarkUrlInput.value = bookmark.url;
-    handleSelectCollections(collectionSelect);
-
-    editModal.classList.remove("hidden");
-  }
-
-  editBookmarkForm.addEventListener("submit", async function (e) {
-    e.preventDefault();
-
-    const id = document.getElementById("bookmark-id").value;
-    const title = document.getElementById("bookmark-title").value;
-    const url = document.getElementById("bookmark-url").value;
-    const collection = document.getElementById("bookmark-collection").value;
-
-    const data = await makeRequest(`/bookmarks/${id}/edit/`, "POST", {
-      title,
-      url,
-      collection,
-    });
-
-    if (data.success) {
-      closeModal();
-      if (!isNaN(currentView)) {
-        getBookmarksByCollection(currentView, currentPage);
-      } else if (currentView === "favorites") {
-        getAllFavorites(currentPage);
-      } else {
-        getAllBookmarks(currentPage);
+      if (collection.id === collectionId) {
+        option.selected = true;
       }
-    }
-  });
 
-  async function getBookmarksByCollection(collectionId, page = 1) {
-    currentView = Number(collectionId);
-    bookmarkForm.classList.add("hidden");
-    const response = await fetch(
-      `/collections/${collectionId}/bookmarks/?page=${page}`
+      select.appendChild(option);
+    });
+
+    if (!collectionId) {
+      defaultOption.selected = true;
+    }
+  },
+
+  toggleCreateBookmarkForm() {
+    const form = document.getElementById("create-bookmark-form");
+    form.style.display = this.currentView.type === "all" ? "block" : "none";
+  },
+
+  toggleCollectionActions() {
+    const deleteButton = document.getElementById("delete-collection-btn");
+    const editButton = document.getElementById("edit-collection-btn");
+    const collectionActions = document.getElementById("collection-actions");
+
+    collectionActions.style.display = "none";
+
+    if (this.currentView.type === "collection") {
+      collectionActions.style.display = "flex";
+      deleteButton.onclick = () => this.deleteCollection(this.currentView.id);
+      editButton.onclick = () => this.openEditCollectionModal();
+    }
+  },
+
+  async deleteCollection(collectionId) {
+    const data = await API.request(
+      `/collections/${collectionId}/delete/`,
+      "POST"
     );
-    const data = await response.json();
-
-    const deleteCollectionButton = document.createElement("button");
-    deleteCollectionButton.textContent = "Delete Collection";
-    deleteCollectionButton.classList.add("btn", "btn-danger");
-    deleteCollectionButton.onclick = async () => {
-      const data = await makeRequest(
-        `/collections/${collectionId}/delete/`,
-        "POST"
-      );
-      if (data.success) {
-        getAllBookmarks(currentPage);
-        getAllCollections();
-      }
-    };
-
-    if (!data.bookmarks || !data.bookmarks.length) {
-      contentDiv.innerHTML = `<p>No bookmarks in this collection.</p>`;
-      contentDiv.appendChild(deleteCollectionButton);
-      return;
-    } else {
-      contentDiv.innerHTML = `<h2>Bookmarks in Collection ${data.collection} (Page ${data.current_page} of ${data.total_pages})</h2>
-      `;
-      contentDiv.appendChild(deleteCollectionButton);
-      data.bookmarks.forEach((bookmark) => createBookmarkCard(bookmark));
-      renderPaginationControls(data, (page) =>
-        getBookmarksByCollection(collectionId, page)
-      );
+    if (data) {
+      this.loadCollections();
+      this.loadBookmarks();
     }
-  }
+  },
 
-  async function getAllBookmarks(page = 1) {
-    currentView = "all";
-    bookmarkForm.classList.remove("hidden");
-    const response = await fetch(`/bookmarks/?page=${page}`);
-    const data = await response.json();
+  openEditCollectionModal() {
+    const modal = document.getElementById("edit-collection-modal");
+    const collectionNameInput = document.getElementById("edit-collection-name");
+    const currentCollection = this.currentView;
 
-    if (!data.bookmarks || !data.bookmarks.length) {
-      contentDiv.innerHTML = `<p>No bookmarks found.</p>`;
-      return;
-    } else {
-      contentDiv.innerHTML = `<h2>All Bookmarks (Page ${data.current_page} of ${data.total_pages})</h2>`;
-      data.bookmarks.forEach((bookmark) => createBookmarkCard(bookmark));
-      renderPaginationControls(data, getAllBookmarks);
-    }
-  }
+    collectionNameInput.value = document.querySelector(
+      `[data-collection-id="${currentCollection.id}"] span`
+    ).textContent;
 
-  async function getAllFavorites(page = 1) {
-    currentView = "favorites";
-    bookmarkForm.classList.add("hidden");
-    const response = await fetch(`/favorites/?page=${page}`);
-    const data = await response.json();
+    modal.classList.remove("hidden");
 
-    if (!data.bookmarks || !data.bookmarks.length) {
-      contentDiv.innerHTML = `<p>No bookmarks found.</p>`;
-      return;
-    } else {
-      contentDiv.innerHTML = `<h2>All Favorites (Page ${data.current_page} of ${data.total_pages})</h2>`;
-      data.bookmarks.forEach((bookmark) => createBookmarkCard(bookmark));
-      renderPaginationControls(data, getAllFavorites);
-    }
-  }
+    document
+      .getElementById("edit-collection-form")
+      .addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const name = collectionNameInput.value;
+        const data = await API.request(
+          `/collections/${currentCollection.id}/edit/`,
+          "POST",
+          { name }
+        );
+        if (data) {
+          modal.classList.add("hidden");
+          this.loadCollections();
+          this.loadBookmarks({ collectionId: currentCollection.id });
+        }
+      });
+  },
 
-  async function toggleFavorite(bookmarkId) {
-    const data = await makeRequest(
+  async toggleFavorite(bookmarkId) {
+    const data = await API.request(
       `/bookmarks/${bookmarkId}/toggle-favorite/`,
       "POST"
     );
-    if (data.success) {
-      const favoriteLabel = document.querySelector(
-        `[data-bookmark-id="${bookmarkId}"] #favorite-label`
-      );
-      favoriteLabel.textContent = data.is_favorite ? "Unfavorite" : "Favorite";
-      if (currentView === "favorites" && data.is_favorite === false) {
-        const bookmarkElement = document.querySelector(
-          `[data-bookmark-id="${bookmarkId}"]`
-        );
-        bookmarkElement.remove();
-      }
-    }
-  }
+    if (data) this.reloadCurrentView();
+  },
 
-  async function deleteBookmark(bookmarkId) {
-    const data = await makeRequest(`/bookmarks/${bookmarkId}/delete/`, "POST");
-    if (data.success) {
-      const bookmarkElement = document.querySelector(
-        `[data-bookmark-id="${bookmarkId}"]`
-      );
-      bookmarkElement.remove();
-    }
-  }
+  async deleteBookmark(bookmarkId) {
+    const data = await API.request(`/bookmarks/${bookmarkId}/delete/`, "POST");
+    if (data) this.reloadCurrentView();
+  },
 
-  function renderPaginationControls(data, getFunction) {
+  reloadCurrentView() {
+    if (this.currentView.type === "collection") {
+      this.loadBookmarks({
+        collectionId: this.currentView.id,
+        page: this.currentPage,
+      });
+    } else if (this.currentView.type === "favorites") {
+      this.loadBookmarks({ isFavorite: true, page: this.currentPage });
+    } else {
+      this.loadBookmarks({ page: this.currentPage });
+    }
+  },
+
+  renderPaginationControls(data) {
     const paginationDiv = document.createElement("div");
-    paginationDiv.classList.add("pagination");
+    paginationDiv.className = "pagination";
 
     if (data.has_previous) {
       const prevButton = document.createElement("button");
       prevButton.textContent = "Previous";
-      prevButton.classList.add("btn");
-      prevButton.onclick = () => {
-        currentPage = data.current_page - 1;
-        getFunction(data.current_page - 1);
-      };
+      prevButton.addEventListener("click", () =>
+        this.loadBookmarks({ page: this.currentPage - 1 })
+      );
       paginationDiv.appendChild(prevButton);
     }
 
     if (data.has_next) {
       const nextButton = document.createElement("button");
       nextButton.textContent = "Next";
-      nextButton.classList.add("btn");
-      nextButton.onclick = () => {
-        currentPage = data.current_page + 1;
-        getFunction(data.current_page + 1);
-      };
+      nextButton.addEventListener("click", () =>
+        this.loadBookmarks({ page: this.currentPage + 1 })
+      );
       paginationDiv.appendChild(nextButton);
     }
 
+    const contentDiv = document.getElementById("dynamic-content");
     contentDiv.appendChild(paginationDiv);
-  }
+  },
 
-  bookmarkForm.addEventListener("submit", async function (e) {
-    e.preventDefault();
-    const title = document.getElementById("create-bookmark-title").value;
-    const url = document.getElementById("create-bookmark-url").value;
+  handleCreateBookmarkForm() {
+    document
+      .getElementById("create-bookmark")
+      .addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const title = document.getElementById("create-bookmark-title").value;
+        const url = document.getElementById("create-bookmark-url").value;
+        const data = await API.request("/bookmarks/create-bookmark/", "POST", {
+          title,
+          url,
+        });
+        if (data) {
+          e.target.reset();
+          this.loadBookmarks();
+        }
+      });
+  },
 
-    const data = await makeRequest("/bookmarks/create-bookmark/", "POST", {
-      title,
-      url,
-    });
+  handleEditBookmarkForm() {
+    document
+      .getElementById("edit-bookmark-form")
+      .addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const id = document.getElementById("bookmark-id").value;
+        const title = document.getElementById("bookmark-title").value;
+        const url = document.getElementById("bookmark-url").value;
+        const collection = document.getElementById("bookmark-collection").value;
+        const data = await API.request(`/bookmarks/${id}/edit/`, "POST", {
+          title,
+          url,
+          collection,
+        });
+        if (data) {
+          document
+            .getElementById("edit-bookmark-modal")
+            .classList.add("hidden");
+          BookmarkApp.reloadCurrentView();
+        }
+      });
+  },
 
-    document.getElementById("create-bookmark-title").value = "";
-    document.getElementById("create-bookmark-url").value = "";
+  handleCreateCollectionForm() {
+    document
+      .getElementById("create-collection-form")
+      .addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const name = document.getElementById("create-collection-name").value;
+        const data = await API.request(
+          "/collections/create-collection/",
+          "POST",
+          {
+            name,
+          }
+        );
+        if (data) {
+          BookmarkApp.loadCollections();
+          e.target.reset();
+        }
+      });
+  },
+};
 
-    if (data.success) {
-      getAllBookmarks(currentPage);
-    }
+document.addEventListener("DOMContentLoaded", () => {
+  BookmarkApp.loadCollections();
+  BookmarkApp.loadBookmarks();
+  BookmarkApp.handleCreateBookmarkForm();
+  BookmarkApp.handleEditBookmarkForm();
+  BookmarkApp.handleCreateCollectionForm();
+
+  document.getElementById("all-bookmarks").addEventListener("click", () => {
+    BookmarkApp.loadBookmarks();
   });
-  collectionForm.addEventListener("submit", async function (e) {
-    e.preventDefault();
-    const name = document.getElementById("create-collection-name").value;
-
-    const data = await makeRequest("/collections/create-collection/", "POST", {
-      name,
-    });
-
-    if (data.success) {
-      getAllCollections();
-      document.getElementById("create-collection-name").value = "";
-    }
+  document.getElementById("favorites").addEventListener("click", () => {
+    BookmarkApp.loadBookmarks({ isFavorite: true });
   });
-  bookmarksButton.addEventListener("click", () => getAllBookmarks(1));
-  favoritesButton.addEventListener("click", () => getAllFavorites(1));
-  collectionButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      getBookmarksByCollection(button.getAttribute("data-collection-id"), 1);
+
+  document
+    .getElementById("close-bookmark-modal")
+    .addEventListener("click", () => {
+      document.getElementById("edit-bookmark-modal").classList.add("hidden");
     });
-  });
+  document
+    .getElementById("close-collection-modal")
+    .addEventListener("click", () => {
+      document.getElementById("edit-collection-modal").classList.add("hidden");
+    });
 });

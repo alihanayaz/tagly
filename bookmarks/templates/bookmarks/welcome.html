@@ -1,0 +1,43 @@
+{% extends 'layout.html' %}
+{% load static %}
+{% block title %}Tagly{% endblock %}
+{% block styles %}
+<link href="{% static 'styles/bookmarks/welcome-layout.css' %}" rel="stylesheet" type="text/css"/>
+{% endblock %}
+{% block body %}
+<div class="container">
+    <header class="sticky">
+      <a href="{% url 'bookmarks:index' %}" class="header-logo"><h1>&#128205; Tagly</h1></a>
+      <a href="{% url 'accounts:login' %}" class="header-item">Log In</a>
+      <a href="{% url 'accounts:signup' %}" class="header-item">Sign Up</a>
+    </header>
+    <main>
+        <div class="section">
+            <div class="card">
+              <h2 class="lead">Welcome to Tagly! <br/><br/> Tagly helps you manage your bookmarks efficiently.</h2>
+            </div>
+          </div>
+          <div class="section">
+            <div class="card">
+              <h3>Features</h3>
+                <div class="feature">
+                    <h3>&#10024; Bookmark Your Links</h3>
+                    <p>Bookmark your favorite links with Tagly. Tagly allows you to save your favorite links and access them from anywhere.</p>
+                </div>
+                <div class="feature">
+                    <h3>&#10024; Organize Your Bookmarks</h3>
+                    <p>Organize your bookmarks into collections. Tagly allows you to create collections and favorite your bookmarks for easy access.
+                    </p>
+                </div>
+                <div class="feature">
+                    <h3>&#10024; Access Your Bookmarks Anywhere</h3>
+                    <p>Access your bookmarks from anywhere. Tagly is a cloud-based bookmark manager that allows you to access your bookmarks from any device.</p>
+                </div>
+            </div>
+          </div>
+    </main>
+    <footer>
+      <p>&copy; Tagly 2024</p>
+    </footer>
+  </div>
+{% endblock %}
