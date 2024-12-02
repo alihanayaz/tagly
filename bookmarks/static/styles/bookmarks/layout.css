@@ -92,8 +92,9 @@ header {
   position: sticky;
   top: 0;
   z-index: 10;
-  padding: 0.2rem 0.4rem;
+  padding: var(--spacing-sm) var(--spacing-md);
   white-space: nowrap;
+  background-color: var(--white);
 }
 
 #sidebar-toggle-button {
@@ -153,9 +154,16 @@ header > .heading {
 
 .pagination {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
   gap: var(--spacing-md);
   margin-top: var(--spacing-md);
+  text-align: center;
+}
+
+.pagination-buttons {
+  display: flex;
+  gap: var(--spacing-md);
 }
 
 .btn-edit {

@@ -250,25 +250,35 @@ const BookmarkApp = {
 
   renderPaginationControls(data) {
     const paginationDiv = document.createElement("div");
+    const paginationButtons = document.createElement("div");
     paginationDiv.className = "pagination";
+    paginationButtons.className = "pagination-buttons";
 
     if (data.has_previous) {
       const prevButton = document.createElement("button");
       prevButton.textContent = "Previous";
+      prevButton.className = "btn btn-primary";
       prevButton.addEventListener("click", () =>
         this.loadBookmarks({ page: this.currentPage - 1 })
       );
-      paginationDiv.appendChild(prevButton);
+      paginationButtons.appendChild(prevButton);
     }
 
     if (data.has_next) {
       const nextButton = document.createElement("button");
       nextButton.textContent = "Next";
+      nextButton.className = "btn btn-primary";
       nextButton.addEventListener("click", () =>
         this.loadBookmarks({ page: this.currentPage + 1 })
       );
-      paginationDiv.appendChild(nextButton);
+      paginationButtons.appendChild(nextButton);
     }
+
+    const pageInfo = document.createElement("p");
+    pageInfo.textContent = `Page ${data.current_page} of ${data.total_pages}`;
+
+    paginationDiv.appendChild(paginationButtons);
+    paginationDiv.appendChild(pageInfo);
 
     const contentDiv = document.getElementById("dynamic-content");
     contentDiv.appendChild(paginationDiv);
