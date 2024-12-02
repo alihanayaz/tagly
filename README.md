@@ -34,6 +34,8 @@
 
 Tagly is a bookmark management tool designed to help users organize, categorize, and access their bookmarks efficiently. With features like collections, favorites, and pagination, Tagly ensures a seamless experience for managing online resources.
 
+Developed as the **CS50W capstone project**, Tagly represents a significant effort in building a user-centric and feature-rich web application. It is tailored to demonstrate advanced web development practices, including robust backend logic, clean user interface design, and seamless interactivity.
+
 ## Installation
 
 <details>
@@ -41,10 +43,14 @@ Tagly is a bookmark management tool designed to help users organize, categorize,
 
 > ```bash
 > git clone https://github.com/alihanayaz/tagly.git
+> cd tagly
 > ```
->
-> Set up a virtual environment:
->
+
+</details>
+
+<details>
+   <summary>2. Set up a virtual environment</summary>
+
 > ```bash
 > python -m venv venv
 > source venv/bin/activate  # For Linux/macOS
@@ -54,7 +60,7 @@ Tagly is a bookmark management tool designed to help users organize, categorize,
 </details>
 
 <details>
-   <summary>2. Install dependencies</summary>
+   <summary>3. Install dependencies</summary>
 
 > ```bash
 > pip install -r requirements.txt
@@ -63,57 +69,67 @@ Tagly is a bookmark management tool designed to help users organize, categorize,
 </details>
 
 <details>
-   <summary>3. Set up PostgreSQL database</summary>
+   <summary>4. Configure the .env file</summary>
 
-> Update the `settings.py` file with your database credentials or use `.env` for secure configuration:
->
-> ```python
-> DATABASES = {
->    'default': {
->        'ENGINE': 'django.db.backends.postgresql',
->        'NAME': 'tagly',
->        'USER': 'your_user',
->        'PASSWORD': 'your_password',
->        'HOST': 'localhost',
->        'PORT': '5432',
->    }
-> }
-> ```
->
-> Alternatively, use the provided `.env.example` file to set up environment variables. Here is an example of a complete `.env` file configuration:
+> Create a `.env` file in the root directory with the following content:
 >
 > ```env
-> SECRET_KEY='django-insecure-123456'
-> DEBUG=False
-> ALLOWED_HOSTS='127.0.0.1,0.0.0.0,users-macbook-pro.local,.vercel.app'
-> DB_NAME=tagly
-> DB_PASSWORD=postgres
-> DB_USER=postgres
-> DB_PORT=5432
-> DB_HOST=localhost
+> SECRET_KEY='your-secret-key'
+> DEBUG=True  # Change to False in production
+> ALLOWED_HOSTS='127.0.0.1,0.0.0.0,localhost,.your-deployment-domain'
+> DB_NAME=your_database_name
+> DB_USER=your_database_user
+> DB_PASSWORD=your_database_password
+> DB_HOST=your_database_host
+> DB_PORT=your_database_port
+> ```
+>
+> Ensure to replace placeholder values with your actual credentials.
+
+</details>
+
+<details>
+   <summary>5. Set up PostgreSQL database</summary>
+
+> Update the `settings.py` file with your database credentials or ensure your `.env` file is correctly configured as shown above. Then, run the following commands:
+>
+> ```bash
+> python manage.py makemigrations
+> python manage.py migrate
 > ```
 
 </details>
 
 <details>
-   <summary>4. Run migrations and create superuser</summary>
+   <summary>6. Create a superuser</summary>
 
 > ```bash
-> python manage.py makemigrations
-> python manage.py migrate
 > python manage.py createsuperuser
 > ```
 
 </details>
 
 <details>
-   <summary>5. Start the development server</summary>
+   <summary>7. Run the development server</summary>
 
 > ```bash
 > python manage.py runserver
 > ```
 >
-> Access the application at `http://127.0.0.1:8000`
+> Access the app at `http://127.0.0.1:8000`.
+
+</details>
+
+<details>
+   <summary>8. Collect static files (for production)</summary>
+
+> If `DEBUG` is set to `False`, you must run the following command to collect static files:
+>
+> ```bash
+> python manage.py collectstatic
+> ```
+>
+> This step is essential for the project to work in a production environment.
 
 </details>
 
@@ -191,21 +207,23 @@ This project leverages the following third-party libraries and tools:
 
 # About and license
 
-Tagly was developed as the capstone project for CS50 Web Programming with Python and JavaScript. It adheres to the course’s guidelines for distinctiveness and complexity.
-
-This project is open-source under the MIT License. Feel free to use, modify, and share it.
+Tagly was developed as the **capstone project for CS50 Web Programming with Python and JavaScript**. It adheres to the course’s guidelines for distinctiveness and complexity.
 
 # Distinctiveness and complexity
 
 Tagly stands out from other projects due to its unique combination of features and implementation:
 
-- **Distinctiveness**: Unlike any CS50W project, Tagly focuses on bookmark management with advanced functionalities like collections and favorites, offering a focused and unique user experience.
-- **Complexity**:
-  - Custom user model and authentication backend.
-  - Advanced bookmark features with AJAX for real-time updates.
-  - Responsive design for seamless use across devices.
-  - Utilization of PostgreSQL for efficient and scalable database management.
-  - Robust database schema with relationships between users, bookmarks, and collections.
-  - Centralized and app-specific static and template folders for modular design.
-  - Configuration for production-ready static file management using `whitenoise`.
+- **Distinctiveness**:
 
+  - While many projects focus on e-commerce, blogs, or basic data display, Tagly offers a robust solution for bookmark management, which is distinct in both purpose and functionality.
+  - Features like collections, favorites, and real-time interactivity elevate its usability.
+  - The project is designed with scalability and performance in mind, leveraging PostgreSQL for efficient data handling.
+
+- **Complexity**:
+  - Custom user model and authentication backend for a seamless user experience.
+  - Advanced bookmark features implemented with a combination of Django views and AJAX for dynamic updates.
+  - Responsive and clean UI built with modular CSS and JavaScript components.
+  - Utilization of PostgreSQL, a powerful relational database system, for scalable and secure data storage.
+  - Production-ready configurations with static file management using `whitenoise` and environment variable support.
+  - Modular structure with centralized and app-specific static and template directories for maintainability.
+  - Pagination logic to enhance user experience when navigating large datasets.
